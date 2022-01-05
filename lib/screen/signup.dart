@@ -1,5 +1,11 @@
+import 'package:ecom_login_project/domain/user.dart';
+import 'package:ecom_login_project/providers/auth_provide.dart';
+import 'package:ecom_login_project/providers/user_provider.dart';
 import 'package:ecom_login_project/screen/login.dart';
+import 'package:flushbar/flushbar.dart';
+//import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Signup extends StatefulWidget {
   const Signup({Key? key}) : super(key: key);
@@ -21,25 +27,40 @@ class _SignupState extends State<Signup> {
     }
     return _msg;
   }
-   String? _userName, _password, _email, _phone, _confirmpassword;
+
+  String? _userName, _password, _email, _phone, _confirmpassword;
   var _name;
+  var response;
   final formkey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
+    AuthProvider auth = Provider.of<AuthProvider>(context);
+    var loading = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        CircularProgressIndicator(),
+        Text("Registering... Please wait"),
+      ],
+    );
+
+    var doRegister = () {
+      print('on doRegister');
+    };
     final form = formkey.currentState;
-
-    Signup(name, email, password) async{
-      setState(() {
-        //isLoading = true;
-      });
-      print("calling");
-
-      Map data = {
-        'email': email,
-        'email': password,
-        'email': name,
-      };
+    if (_password!.endsWith(_confirmpassword!)) {
+      //auth.register(_userName!, _password!);
+      if (response['status']) {
+        User user = response['data'];
+        Provider.of<UserProvider>(context).setUser(user);
+        Navigator.pushReplacementNamed(context, '/login');
+      } else {
+        Flushbar(
+          title: 'Registation failed',
+          message: response.toString(),
+          duration: Duration(seconds: 10),
+        );
+      }
     }
     return Scaffold(
       body: SingleChildScrollView(
@@ -94,10 +115,14 @@ class _SignupState extends State<Signup> {
                       TextFormField(
                         autofocus: false,
                         obscureText: true,
-                        validator: (value) => value!.isEmpty?"Please enter password":null,
-                        onSaved: (value) => setState(() {
-                          _password = value;
-                        }),
+                        validator: (value) =>
+                        value!.isEmpty
+                            ? "Please enter password"
+                            : null,
+                        onSaved: (value) =>
+                            setState(() {
+                              _password = value;
+                            }),
                         //decoration: buildInputDecoration('Enter Password', Icons.password),
                       ),
                       SizedBox(height: 20.0,),
@@ -106,11 +131,14 @@ class _SignupState extends State<Signup> {
                       TextFormField(
                         autofocus: false,
                         obscureText: true,
-                        validator: (value) => value!.isEmpty?"Please enter password":null,
+                        validator: (value) =>
+                        value!.isEmpty
+                            ? "Please enter password"
+                            : null,
                         onSaved: (value) {
                           _confirmpassword = value;
                           setState(() {
-                            if(_password == _confirmpassword){
+                            if (_password == _confirmpassword) {
                               _password = _confirmpassword;
                             }
                           });
@@ -119,22 +147,28 @@ class _SignupState extends State<Signup> {
                         //decoration: buildInputDecoration('Enter Password', Icons.password),
                       ),
                       SizedBox(height: 20,),
+                      auth.loggedInStatus == Status.Authenticating
+                          ? loading
+                          : loading,
+                      SizedBox(height: 20,),
                       Center(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 60, vertical: 20),
                             primary: Colors.red,
                             onPrimary: Colors.teal,
                           ),
-                          onPressed: (){
+                          onPressed: () {
                             print(_email.toString());
                             print(_name.toString());
                             print(_phone.toString());
                             print(_password.toString());
                           },
                           child: InkWell(
-                            onTap: (){
-                              Navigator.push(context,MaterialPageRoute(builder: (context) => Login()),
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) => Login()),
                               );
                             },
                             child: Text("CREATE ACCOUNT",
@@ -151,15 +185,15 @@ class _SignupState extends State<Signup> {
                         child: Column(
                           children: [
                             Text("HAVE NOT ACCOUNT YET?",
-                            style: TextStyle(
-                              color: Colors.black12,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                              style: TextStyle(
+                                color: Colors.black12,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             SizedBox(height: 10,),
                             InkWell(
-                              onTap: (){
+                              onTap: () {
                                 Navigator.pop(context);
                               },
                               child: Text("LOGIN",
@@ -182,19 +216,4 @@ class _SignupState extends State<Signup> {
       ),
     );
   }
-
-  buildInputDecoration(String s, IconData email) {}
-
-
 }
-
-Flushbar({required String title, required String message, required Duration duration}) {
-
-}
-
-
-
-
-
-
-
