@@ -1,11 +1,10 @@
-import 'package:ecom_login_project/domain/user.dart';
-import 'package:ecom_login_project/providers/auth_provide.dart';
-import 'package:ecom_login_project/providers/user_provider.dart';
+import 'dart:math';
+import 'package:ecom_login_project/drawer/home_page.dart';
+import 'package:ecom_login_project/screen/home_page.dart';
 import 'package:ecom_login_project/screen/login.dart';
-import 'package:flushbar/flushbar.dart';
-//import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 
 class Signup extends StatefulWidget {
   const Signup({Key? key}) : super(key: key);
@@ -16,52 +15,41 @@ class Signup extends StatefulWidget {
 
 class _SignupState extends State<Signup> {
 
-  String? validateEmail(String? value) {
-    String? _msg;
-    RegExp regex = new RegExp(
-        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
-    if (value!.isEmpty) {
-      _msg = "Your username is required";
-    } else if (regex.hasMatch(value)) {
-      _msg = "Please provide a valid emal address";
-    }
-    return _msg;
-  }
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  TextEditingController reponseController = TextEditingController();
+  TextEditingController ConfirmedController = TextEditingController();
 
-  String? _userName, _password, _email, _phone, _confirmpassword;
-  var _name;
-  var response;
-  final formkey = GlobalKey<FormState>();
+
+  String? email, password, phone, name, reponse;
+
+  void Login(String email, password, phone, name) async{
+    try{
+       Response response = await post(
+          Uri.parse('https://classyecommerce.excelitaiportfolio.com/api/user/registration'),
+          body:{
+            "email": email,
+            "password": password,
+            "name": name,
+            "phone": phone,
+        },
+      );
+       if(response.statusCode == 200){
+         print(response.statusCode);
+         Navigator.push(context, MaterialPageRoute(builder: (Context)=> Homepage()));
+       }else{
+         print('failed');
+       }
+
+    }catch(e){
+      print(e.toString());
+    }
+    }
 
   @override
   Widget build(BuildContext context) {
-    AuthProvider auth = Provider.of<AuthProvider>(context);
-    var loading = Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        CircularProgressIndicator(),
-        Text("Registering... Please wait"),
-      ],
-    );
-
-    var doRegister = () {
-      print('on doRegister');
-    };
-    final form = formkey.currentState;
-    if (_password!.endsWith(_confirmpassword!)) {
-      //auth.register(_userName!, _password!);
-      if (response['status']) {
-        User user = response['data'];
-        Provider.of<UserProvider>(context).setUser(user);
-        Navigator.pushReplacementNamed(context, '/login');
-      } else {
-        Flushbar(
-          title: 'Registation failed',
-          message: response.toString(),
-          duration: Duration(seconds: 10),
-        );
-      }
-    }
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
@@ -88,16 +76,17 @@ class _SignupState extends State<Signup> {
                       TextFormField(
                         autofocus: false,
                         //validator: validateName,
-                        onSaved: (value) => _name = value,
+                        onSaved: (value) => name = value,
                         //decoration: buildInputDecoration('Enter Name', Icons.email),
                       ),
                       SizedBox(height: 15.0,),
                       Text("Email"),
                       SizedBox(height: 5.0,),
                       TextFormField(
+                        controller: emailController,
                         autofocus: false,
                         //validator: validateEmail,
-                        onSaved: (value) => _email = value,
+                        onSaved: (value) => email = value,
                         //decoration: buildInputDecoration('Enter Email', Icons.email),
                       ),
                       SizedBox(height: 15.0,),
@@ -106,7 +95,7 @@ class _SignupState extends State<Signup> {
                       TextFormField(
                         autofocus: false,
                         //validator: validateEmail,
-                        onSaved: (value) => _phone = value,
+                        onSaved: (value) => phone = value,
                         //decoration: buildInputDecoration('Enter Phone number', Icons.email),
                       ),
                       SizedBox(height: 20.0,),
@@ -121,7 +110,7 @@ class _SignupState extends State<Signup> {
                             : null,
                         onSaved: (value) =>
                             setState(() {
-                              _password = value;
+                              password = value;
                             }),
                         //decoration: buildInputDecoration('Enter Password', Icons.password),
                       ),
@@ -129,84 +118,89 @@ class _SignupState extends State<Signup> {
                       Text("Confirmed Password"),
                       SizedBox(height: 5.0,),
                       TextFormField(
+                        controller: passwordController,
                         autofocus: false,
                         obscureText: true,
                         validator: (value) =>
                         value!.isEmpty
                             ? "Please enter password"
                             : null,
-                        onSaved: (value) {
-                          _confirmpassword = value;
+                        onChanged: (value) {
                           setState(() {
-                            if (_password == _confirmpassword) {
-                              _password = _confirmpassword;
+                            if (password == ConfirmedController) {
+                              password = ConfirmedController as String?;
                             }
-                          });
-                          //return ;
-                        },
-                        //decoration: buildInputDecoration('Enter Password', Icons.password),
-                      ),
-                      SizedBox(height: 20,),
-                      auth.loggedInStatus == Status.Authenticating
-                          ? loading
-                          : loading,
-                      SizedBox(height: 20,),
-                      Center(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 60, vertical: 20),
-                            primary: Colors.red,
-                            onPrimary: Colors.teal,
-                          ),
-                          onPressed: () {
-                            print(_email.toString());
-                            print(_name.toString());
-                            print(_phone.toString());
-                            print(_password.toString());
                           },
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.push(context, MaterialPageRoute(
-                                  builder: (context) => Login()),
-                              );
-                            },
-                            child: Text("CREATE ACCOUNT",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
+                            // onSaved: (value) {
+                            //   _confirmpassword = value;
+                            //   setState(() {
+                            //     if (_password == _confirmpassword) {
+                            //       _password = _confirmpassword;
+                            //     }
+                            //   });
+                            //   //return ;
+                            // },
+                            // decoration: buildInputDecoration('Enter Password', Icons.password),
+                          );
+                        }
                       ),
-                      SizedBox(height: 20,),
-                      Center(
-                        child: Column(
-                          children: [
-                            Text("HAVE NOT ACCOUNT YET?",
-                              style: TextStyle(
-                                color: Colors.black12,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 10,),
-                            InkWell(
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text("LOGIN",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                    SizedBox(height: 20),
+                    Center(
+                    child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(
+                horizontal: 60, vertical: 20),
+            primary: Colors.red,
+            onPrimary: Colors.teal,
+          ),
+          onPressed: () {
+            print(email.toString());
+            print(name.toString());
+            print(phone.toString());
+            print(password.toString());
+          },
+          child: InkWell(
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (Context)=> Loginpage()));
+            },
+            child: Text("CREATE ACCOUNT",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+
+      ),
+      SizedBox(height: 20,),
+      Center(
+      child: Column(
+        children: [
+          Text("HAVE NOT ACCOUNT YET?",
+            style: TextStyle(
+              color: Colors.black12,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 10,),
+          InkWell(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: Text("LOGIN",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+
+                ),
+                  ]
                   ),
                 ),
               ],

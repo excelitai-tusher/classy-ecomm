@@ -1,4 +1,11 @@
+import 'package:ecom_login_project/drawer/settings.dart';
 import 'package:flutter/material.dart';
+import 'contacts.dart';
+import 'dashboard.dart';
+import 'my_drawer_header.dart';
+import 'my_drawer_list.dart';
+import 'notifications.dart';
+
 class Homepage extends StatefulWidget {
   const Homepage({Key? key}) : super(key: key);
 
@@ -7,29 +14,35 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+  var currentPage = DrawerSections.dashboard;
+  var currentPage1 = DrawerSections.contacts;
+  var currentPage2 = DrawerSections.settings;
+  var currentPage3 = DrawerSections.notifications;
+
   @override
   Widget build(BuildContext context) {
+    var Container;
+    if(currentPage == DrawerSections.dashboard){
+      Container = Dashboard();
+    }else if(currentPage1 == DrawerSections.contacts){
+      Container = Contacts();
+    }else if(currentPage2 == DrawerSections.settings){
+      Container = settings();
+    }else if(currentPage3 == DrawerSections.notifications){
+      Container = notifications();
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green[700],
-        title: Center(child: Text("Drawer page")),
+        title: Text("Drawer page"),
       ),
-      body: Container(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 150),
-          child: Column(
-            children: [
-              Center(child: Text("Home Page")),
-            ],
-          ),
-        ),
-      ),
+      body: Container,
       drawer: Drawer(
         child: SingleChildScrollView(
           child: Column(
             children: [
-              MyHeaderDrawer(),
-              MyDrawerList(),
+               MyHeaderDrawer(),
+               MyDrawerList(),
             ],
           ),
         ),
@@ -38,60 +51,3 @@ class _HomepageState extends State<Homepage> {
   }
 }
 
-// Registration page ....
-
-// {
-// "message": "Registration Successfull",
-// "data": {
-// "name": "abirtusher",
-// "email": "user440@gmail.com",
-// "phone": "01758738893",
-// "updated_at": "2022-01-08T04:47:22.000000Z",
-// "created_at": "2022-01-08T04:47:22.000000Z",
-// "id": 23,
-// "profile_photo_url": "https://ui-avatars.com/api/?name=abirtusher&color=7F9CF5&background=EBF4FF"
-// }
-// }
-
-
-// Login page .....
-
-
-// {
-// "message": "Login Successfull",
-// "token": "138|2QAA4jIR8NssEuJZG7ovZ2FY1EnwoSEt5NxuX80P",
-// "data": {
-// "id": 23,
-// "name": "abirtusher",
-// "email": "user440@gmail.com",
-// "provider_id": null,
-// "avatar": null,
-// "phone": "01758738893",
-// "last_seen": null,
-// "email_verified_at": null,
-// "current_team_id": null,
-// "profile_photo_path": null,
-// "created_at": "2022-01-08T04:47:22.000000Z",
-// "updated_at": "2022-01-08T04:47:22.000000Z",
-// "profile_photo_url": "https://ui-avatars.com/api/?name=abirtusher&color=7F9CF5&background=EBF4FF"
-// }
-// }
-
-
- //user route page.......
-
-// {
-// "id": 23,
-// "name": "abirtusher",
-// "email": "user440@gmail.com",
-// "provider_id": null,
-// "avatar": null,
-// "phone": "01758738893",
-// "last_seen": null,
-// "email_verified_at": null,
-// "current_team_id": null,
-// "profile_photo_path": null,
-// "created_at": "2022-01-08T04:47:22.000000Z",
-// "updated_at": "2022-01-08T04:47:22.000000Z",
-// "profile_photo_url": "https://ui-avatars.com/api/?name=abirtusher&color=7F9CF5&background=EBF4FF"
-// }

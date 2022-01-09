@@ -1,162 +1,124 @@
-import 'package:ecom_login_project/providers/auth_provide.dart';
+import 'package:ecom_login_project/drawer/home_page.dart';
+import 'package:ecom_login_project/screen/home_page.dart';
 import 'package:ecom_login_project/screen/signup.dart';
-import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:http/http.dart';
 
-class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
+class Loginpage extends StatefulWidget {
+   const Loginpage({Key? key}) : super(key: key);
 
   @override
-  _LoginState createState() => _LoginState();
+  _LoginpageState createState() => _LoginpageState();
 }
 
-class _LoginState extends State<Login> {
-  final formkey = GlobalKey<FormState>();
-  String? _userName, _password;
+class _LoginpageState extends State<Loginpage> {
 
-  String? validateEmail(String? value) {
-    String? _msg;
-    RegExp regex = new RegExp(
-        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
-    if (value!.isEmpty) {
-      _msg = "Your username is required";
-    } else if (!regex.hasMatch(value)) {
-      _msg = "Please provide a valid email address";
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  final formkey = GlobalKey<FormState>();
+  String? userName, password;
+
+  void login(String email, password) async {
+    try {
+      final response = await post(
+          Uri.parse(
+              'https://classyecommerce.excelitaiportfolio.com/api/user/login'),
+          body: {
+            'email': email,
+            'password': password,
+          }
+      );
+      if (response.statusCode == 200) {
+        print(response.statusCode);
+        Navigator.push(context,MaterialPageRoute(
+            builder: (Context)=> Homepage()));
+      } else {
+        print('failed');
+      }
     }
-    return _msg;
+    catch (e) {
+      print(e.toString());
+    }
   }
+
   @override
   Widget build(BuildContext context) {
-    AuthProvider auth = Provider.of<AuthProvider>(context);
-    var dologin = (){
-      final form = formkey.currentState;
-      if(form!.validate()){
-        form.save();
-        final Future<Map<String,dynamic>> response = auth.login(_userName!, _password!);
-      }else{
-        Flushbar(
-          title: 'Invalid form',
-          message: 'Please complete the form properly',
-          duration: Duration(seconds: 10),
-        );
-      }
-    };
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
           child: Padding(
             padding: const EdgeInsets.all(40.0),
-            child: Form(
-              key: formkey,
-              child: Column(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("LOGIN",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
+                  Text(
+                    'Login', style: TextStyle(color: Colors.black, fontSize: 30),),
+                  TextFormField(
+                    validator: (input) {
+                      if (input!.isEmpty) {
+                        return "Please type an email";
+                      }
+                    },
+                    controller: emailController,
+                    decoration: InputDecoration(
+                        labelText: 'Enter Your Email'),
                   ),
+                  TextFormField(
+                    validator: (input) {
+                      if (input!.length < 6) {
+                        return "your password needs to be atlest 6 characters";
+                      }
+                    },
+                    controller: passwordController,
+                    decoration: InputDecoration(labelText: 'Password'),
+                    obscureText: true,
                   ),
-                  SizedBox(height: 10,),
-                  Form(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 15.0,),
-                        Text("Email"),
-                        SizedBox(height: 5.0,),
-                        TextFormField(
-                          autofocus: false,
-                          validator: validateEmail,
-                          onSaved: (value) => _userName = value!,
-                          decoration: buildInputDecoration('Enter Email', Icons.email),
-                        ),
-                        SizedBox(height: 20.0,),
-                        Text("Password"),
-                        SizedBox(height: 5.0,),
-                        TextFormField(
-                          autofocus: false,
-                          obscureText: true,
-                          validator: (value) => value!.isNotEmpty?"Please enter password":null,
-                          onSaved: (value) => _password = value!,
-                          decoration: buildInputDecoration('Enter Password', Icons.password),
-                        ),
-                        SizedBox(height: 20,),
-                        longButtons(Login, dologin),
-                        SizedBox(height: 20,),
-                        Center(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(horizontal: 60, vertical: 20),
-                              primary: Colors.red,
-                              onPrimary: Colors.teal,
-                            ),
-                              onPressed: (){},
-                              child: InkWell(
-                                // onTap: (){
-                                //   Navigator.push(context,MaterialPageRoute(builder: (context) => Signup()),
-                                //   );
-                                // },
-                                child: Text("Login",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                ),
-                              ),
-                          ),
-                        ),
-                        SizedBox(height: 20,),
-                        Center(
-                          child: Column(
-                            children: [
-                              Text("HAVE NOT ACCOUNT YET?",
-                                style: TextStyle(
-                                  color: Colors.black12,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 10,),
-                              InkWell(
-                                onTap: (){
-                                  Navigator.push(context,MaterialPageRoute(builder: (context) => Signup()),
-                                  );
-                                },
-                                child: Text("SIGN UP",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                  //SizedBox(height: 80,),
+                  RaisedButton(
+                    color: Colors.redAccent,
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 90),
+                    onPressed: () {
+                      print("Successfully");
+                      // Loginpage(
+                      //     emailController.text.toString(),
+                      //     passwordController.text.toString(),
+                      // );
+                    },
+                    child: InkWell(
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (Context)=> Homepage()));
+                      },
+                      child: Text('Login',
+                        style: TextStyle(color: Colors.white,
+                            fontSize: 20),),
                     ),
                   ),
-                ],
-              ),
+                  //SizedBox(height: 20,),
+
+                  Text('OR LOGIN WITH',
+                    style: TextStyle(color: Colors.black54, fontSize: 15),),
+                  //SizedBox(height: 130,),
+
+
+                  Text('HAVE NOT ACCOUNT YET ?',
+                    style: TextStyle(color: Colors.black54, fontSize: 15),),
+
+                  SizedBox(height: 40,),
+
+                  InkWell(
+                    // onTap: (){
+                    //   Navigator.push(context,MaterialPageRoute(
+                    //       builder: (Context)=>Registation()));
+                    // },
+                    child: Text('SIGN UP',
+                      style: TextStyle(color: Colors.black, fontSize: 20),),
+                  ),
+                ]
             ),
           ),
         ),
       ),
     );
   }
-
-  buildInputDecoration(String s, IconData email) {}
-
 }
-
-longButtons(Type login, Null Function() dologin) {
-}
-
-
-
-
-
-
-
-
