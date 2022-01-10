@@ -1,5 +1,5 @@
 // Registration page ...
-
+//
 // {
 // "message": "Registration Successfull",
 // "data": {

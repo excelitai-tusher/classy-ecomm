@@ -8,6 +8,7 @@ class MyHeaderDrawer extends StatefulWidget {
 }
 
 class _MyHeaderDrawerState extends State<MyHeaderDrawer> {
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -24,7 +25,7 @@ class _MyHeaderDrawerState extends State<MyHeaderDrawer> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               image: DecorationImage(
-                image: AssetImage('images/abir.jpeg'),
+                image: NetworkImage("https://ui-avatars.com/api/?name=abirtusher&color=7F9CF5&background=EBF4FF"),//AssetImage('images/abir.jpeg'),
               ),
             ),
           ),
